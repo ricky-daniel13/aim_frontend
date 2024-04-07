@@ -26,7 +26,7 @@ export const DoLogin = async (
     });
 
     if (response.status == 401) {
-      throw new ExtError(response.statusText, 'Incorrect Login Data.', 'Please check your login data and try again.');
+      throw new ExtError(response.statusText, 'Incorrect Login Data.', 'The password or email you entered are incorrect. Check if you\'ve written them correctly and try again.');
     } else if (!response.ok) {
       throw new ExtError(response.statusText, 'Network Error', 'There was an error contacting the server. Check your internet connection or try again later.');
     } else {

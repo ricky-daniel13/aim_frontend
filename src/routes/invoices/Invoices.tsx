@@ -43,28 +43,36 @@ const Invoices: React.FC = () => {
     const navigate = useNavigate();
 
     async function GetData() {
-
         if (UserState?.userData.authToken == null)
             return;
         await LoadInvoice(0);
 
+
         if (UserState?.userData.isClient)
             return;
+        try{setLoading(true);
         setLoading(true);
         const prods = await GetProducts(UserState!);
         setProdData(prods!);
 
         const clients = await GetClients(UserState!);
         setClientData(clients!);
-        setLoading(false);
+        setLoading(false);}
+        catch{
+            Logoff();
+        }
     }
 
     async function LoadInvoice(page: number) {
-        setLoading(true);
-        const invoices = await GetInvoices(UserState!, page, 5);
-        setInvData(invoices!.invoices);
-        setInvCount(invoices!.rowCount);
-        setLoading(false);
+        try{setLoading(true);
+            const invoices = await GetInvoices(UserState!, page, 5);
+            setInvData(invoices!.invoices);
+            setInvCount(invoices!.rowCount);
+            setLoading(false);}
+        catch{
+            Logoff();
+        }
+        
     }
 
     async function SendInvoice(inv: NewInvoice) {
@@ -98,7 +106,7 @@ const Invoices: React.FC = () => {
     }
     else
         return (
-            <Box sx={{ display: 'flex' }} minWidth={"100vw"} minHeight={"100vh"}>
+            <Box sx={{ display: 'flex' }} minWidth={"100vw"} minHeight={"100vh"} component="main">
                 <CssBaseline />
                 <Backdrop open={isLoading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}><CircularProgress color="inherit" /></Backdrop>
                 <InvoicesProducts isOpen={selectedInv != null} invoice={selectedInv} onClickClose={() => { setSelectedInv(null) }}></InvoicesProducts>
