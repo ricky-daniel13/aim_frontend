@@ -1,17 +1,16 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import Invoices from './routes/invoices/Invoices'
 import './index.css'
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { ThemeOptions, ThemeProvider, createTheme } from '@mui/material/styles';
-import { lime, orange, purple } from '@mui/material/colors';
 import { AuthProvider } from './context/AuthContext';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { LocalizationProvider } from '@mui/x-date-pickers';
-
+import { BrowserRouter } from "react-router-dom";
+import { ThemeProvider, createTheme } from '@mui/material';
+import App from './App';
 
 const theme = createTheme({
   palette: {
@@ -32,11 +31,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
   <React.StrictMode>
     <LocalizationProvider dateAdapter={AdapterMoment}>
-    <AuthProvider>
-      <ThemeProvider theme={theme}>
-        <Invoices />
-      </ThemeProvider>
-    </AuthProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <ThemeProvider theme={theme}>
+            <App />
+          </ThemeProvider>
+        </BrowserRouter>
+      </AuthProvider>
     </LocalizationProvider>
   </React.StrictMode>,
 )

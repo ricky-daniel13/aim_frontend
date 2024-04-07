@@ -1,4 +1,5 @@
 import React, { createContext, useState} from 'react';
+import { useLocalStorage } from "../hooks/UseLocalStorage";
 
 export const AuthContext = createContext<UserState|null>(null);
 
@@ -6,28 +7,33 @@ export const AuthContext = createContext<UserState|null>(null);
 export type UserState = {
     userData: UserData;
     setUserData: React.Dispatch<React.SetStateAction<UserData>>;
+    setUserCookie: any;
   };
+
+
 
 type UserData = {
     email?: string;
     isClient?: boolean;
     name?:string;
     password?: string;
-    sessionToken?: string;
+    authToken?: string;
   };
 
 //Provider object that sets the user authentication data provider
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  
+    const [userCookie, setUserCookie] = useLocalStorage("user", null);
     const [userData, setUserData] = useState<UserData>({
-        email: undefined,
-        password: undefined,
-        sessionToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFpbWVkZ2UuY29tIiwiaWF0IjoxNzEyNDcyNjc0LCJleHAiOjE3MTI0NzYyNzR9.VJz4cEA-UtFs4n9Xh9JdHM16NKFGjboLQDP0GgmcUi8",
-        name: "Federico",
-        isClient: false,
+        email: userCookie ? userCookie.email : null,
+        password: userCookie ? userCookie.password : null,
+        authToken: userCookie ? userCookie.authToken : null,
+        name: userCookie ? userCookie.name : null,
+        isClient: userCookie ? userCookie.isClient : true,
     });
   
     return (
-      <AuthContext.Provider value={{userData, setUserData}}>
+      <AuthContext.Provider value={{userData, setUserData, setUserCookie}}>
         {children}
       </AuthContext.Provider>
     );

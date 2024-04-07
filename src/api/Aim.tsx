@@ -1,59 +1,44 @@
 
+import { NavigateFunction } from "react-router-dom";
 import { UserState } from "../context/AuthContext";
 import ExtError from "../library/ExtError";
 
 export const API_URL = 'http://localhost:3000';
 
-type LoginReturn = {
-  userToken: string;
-  o_u: string;
-  sessionToken: string;
+type LoginDTO = {
+  name: string;
+  authToken: string;
+  isClient: boolean;
 };
 
 export const DoLogin = async (
   email: string,
   password: string,
-): Promise<LoginReturn | null> => {
+): Promise<LoginDTO | null> => {
 
     console.log('Starting net request');
-    const response = await fetch(API_URL, {
+    const response = await fetch(API_URL+"/login", {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: new URLSearchParams({
-        req: 'createOauthkey',
-        login: email,
-        pwd: password,
-      }).toString(),
+      body: JSON.stringify({email:email,password:password}),
     });
 
-    if (!response.ok) {
+    if (response.status == 401) {
+      throw new ExtError(response.statusText, 'Incorrect Login Data.', 'Please check your login data and try again.');
+    } else if (!response.ok) {
       throw new ExtError(response.statusText, 'Network Error', 'There was an error contacting the server. Check your internet connection or try again later.');
     } else {
       console.log('Network data gotten!');
     }
 
-    const data = await response.json();
+    const data : LoginDTO = await response.json();
     // Handle the response data
     console.log(data);
 
-    if (data.status == 'nok') {
-      console.log("Nok status in data.");
-      if (data.error.includes('invalid login/pwd')) {
-        console.log('Bad login data, returning');
-        throw new ExtError(data.error, 'Incorrect Login Data.', 'Please check your login data and try again.');
-      } else 
-      throw new ExtError(data.error, 'Unknown Server Error.', 'Please try again later.');
-    }
+    return data;
 
-    const sessionToken = await DoSession(data.o_u, data.oauthkey);
-
-    return {
-      userToken: data.oauthkey,
-      o_u: data.o_u,
-      sessionToken: sessionToken!,
-    };
 };
 
 export type ProductPurch = {
@@ -78,6 +63,15 @@ export type InvoiceDTO = {
   invoices: Invoice[];
 };
 
+export const Logout = (
+  userState: UserState,
+  navigate: NavigateFunction
+) => {
+    userState.setUserCookie('user',null);
+    userState.setUserData({});
+    navigate('/');
+};
+
 
 export const GetInvoices = async (
   userState: UserState,
@@ -85,7 +79,7 @@ export const GetInvoices = async (
   limit: number
 ): Promise<InvoiceDTO | null> => {
     console.log('Starting invoices request');
-    if(!userState.userData.sessionToken)
+    if(!userState.userData.authToken)
         return null;
     const response = await fetch(API_URL + "/invoices?" + new URLSearchParams({
       page: page.toString(),
@@ -94,8 +88,7 @@ export const GetInvoices = async (
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userState.userData.sessionToken}`
+        'Authorization': `Bearer ${userState.userData.authToken}`
       },
     });
 
@@ -135,7 +128,7 @@ export const PostInvoice = async (
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userState.userData.sessionToken}`
+        'Authorization': `Bearer ${userState.userData.authToken}`
       },
       body: JSON.stringify(invoice)
     });
@@ -157,14 +150,14 @@ export const GetProducts = async (
   userState: UserState,
 ): Promise<Product[] | null> => {
     console.log('Starting products request');
-    if(!userState.userData.sessionToken)
+    if(!userState.userData.authToken)
         return [];
     const response = await fetch(API_URL + "/products", {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userState.userData.sessionToken}`
+        'Authorization': `Bearer ${userState.userData.authToken}`
       },
     });
 
@@ -188,14 +181,14 @@ export const GetClients = async (
   userState: UserState,
 ): Promise<Client[] | null> => {
     console.log('Starting products request');
-    if(!userState.userData.sessionToken)
+    if(!userState.userData.authToken)
         return [];
     const response = await fetch(API_URL + "/clients", {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userState.userData.sessionToken}`
+        'Authorization': `Bearer ${userState.userData.authToken}`
       },
     });
 
@@ -207,36 +200,4 @@ export const GetClients = async (
 
     const data: Client[] = await response.json();
     return data;
-};
-
-export const DoSession = async (
-  o_u: string,
-  userToken: string,
-): Promise<string | null> => {
-    console.log('Starting session request');
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        req: 'createSesskey',
-        o_u: o_u,
-        oauthkey: userToken,
-      }).toString(),
-    });
-
-    if (!response.ok) {
-      throw new ExtError(response.statusText, 'Network Error', 'There was an error contacting the server. Check your internet connection or try again later.');
-    } else {
-      ('Network data gotten!');
-    }
-
-    const data = await response.json();
-    console.log(data);
-
-    if (data.status == 'nok') throw new ExtError(data.error, 'Unknown Server Error.', 'Please try again later.');
-
-    return data.sesskey;
-
 };

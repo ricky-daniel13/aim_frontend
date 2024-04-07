@@ -6,10 +6,11 @@ import LogoutIcon from '@mui/icons-material/Logout';
 interface DrawerProps {
     open: boolean;
     drawerWidth: number;
-    onClose?: () => void;
+    onClose: () => void;
+    onLogout: () => void;
 }
 
-const AimDrawer: React.FC<DrawerProps> = ({ open, drawerWidth, onClose }) => {
+const AimDrawer: React.FC<DrawerProps> = ({ open, drawerWidth, onClose, onLogout }) => {
     const theme = useTheme();
 
     const drawerComponents = (
@@ -40,7 +41,7 @@ const AimDrawer: React.FC<DrawerProps> = ({ open, drawerWidth, onClose }) => {
             <List style={{ position: "absolute", bottom: 0, right: 0, left: 0, }}>
                 <Divider />
                 <ListItem disablePadding>
-                    <ListItemButton>
+                    <ListItemButton onClick={onLogout}>
                         <ListItemIcon>
                             <LogoutIcon />
                         </ListItemIcon>
