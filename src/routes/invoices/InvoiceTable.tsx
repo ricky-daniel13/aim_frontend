@@ -63,7 +63,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ rows, onPageChange, onVouch
                             <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} key={index}>
                                 <TableCell component="th" align="left">{row.id}</TableCell>
                                 <TableCell align="center">{row.clientName}</TableCell>
-                                <TableCell align="center">{moment(row.date).format("DD/MM/YYYY")}</TableCell>
+                                <TableCell align="center">{moment(row.date).format("MM/DD/YYYY")}</TableCell>
                                 <TableCell align="right" sx={{display: { sm: 'none', xs:'none', md:'table-cell'} }}>${subtotal}</TableCell>
                                 <TableCell align="center" sx={{display: { sm: 'none', xs:'none', md:'table-cell'} }}>{row.discount}%</TableCell>
                                 <TableCell align="right">${total}</TableCell>
