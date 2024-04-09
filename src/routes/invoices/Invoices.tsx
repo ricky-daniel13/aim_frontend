@@ -10,10 +10,11 @@ import AimDrawer from '../../components/AimDrawer';
 import { useContext, useEffect, useState } from 'react';
 import AimAppBar from '../../components/AimAppBar';
 import InvoiceDialog from './InvoiceDialog';
-import { Client, GetClients, GetInvoices, GetProducts, Invoice, Logout, NewInvoice, PostInvoice, Product, ProductPurch } from '../../api/Aim';
+import { Client, GetClients, GetInvoices, GetProducts, Invoice, Logout, NewInvoice, PostInvoice, Product} from '../../api/Aim';
 import { AuthContext } from '../../context/AuthContext';
 import InvoicesProducts from './InvoicesProducts';
 import { Navigate, useNavigate } from 'react-router-dom';
+import InvoicesVoucher from './InvoicesVoucher';
 
 const darkTheme = createTheme({
     palette: {
@@ -36,6 +37,8 @@ const Invoices: React.FC = () => {
     const [invCount, setInvCount] = useState<number>(0);
     const [prodData, setProdData] = useState<Product[]>([]);
     const [selectedInv, setSelectedInv] = useState<Invoice | null>(null);
+    const [openVoucher, setOpenVoucher] = useState(false);
+    const [openProducts, setOpenProducts] = useState(false);
     const [clientData, setClientData] = useState<Client[]>([]);
     const [isLoading, setLoading] = useState(false);
 
@@ -77,13 +80,17 @@ const Invoices: React.FC = () => {
 
     async function SendInvoice(inv: NewInvoice) {
 
+        try{setLoading(true);
         setInvDiagOpen(false);
         setLoading(true);
         await PostInvoice(UserState!, inv);
         const invoices = await GetInvoices(UserState!, 0, 5);
         setInvData(invoices!.invoices);
         setInvCount(invoices!.rowCount);
-        setLoading(false);
+        setLoading(false);}
+        catch{
+            Logoff();
+        }
     }
 
     function Logoff(){
@@ -109,7 +116,8 @@ const Invoices: React.FC = () => {
             <Box sx={{ display: 'flex' }} minWidth={"100vw"} minHeight={"100vh"} component="main">
                 <CssBaseline />
                 <Backdrop open={isLoading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}><CircularProgress color="inherit" /></Backdrop>
-                <InvoicesProducts isOpen={selectedInv != null} invoice={selectedInv} onClickClose={() => { setSelectedInv(null) }}></InvoicesProducts>
+                <InvoicesProducts isOpen={openProducts} invoice={selectedInv} onClickClose={() => { setOpenProducts(false) }}></InvoicesProducts>
+                <InvoicesVoucher isOpen={openVoucher} invoice={selectedInv} onClickClose={() => { setOpenVoucher(false) }}></InvoicesVoucher>
                 <InvoiceDialog isOpen={isInvDiagOpen} products={prodData} clients={clientData} onClickClose={() => { setInvDiagOpen(false) }} onCreateInvoice={SendInvoice}></InvoiceDialog>
                 <AimAppBar drawerWidth={drawerWidth} onOpenDrawer={() => { setDrawerOpen(true) }}></AimAppBar>
                 <ThemeProvider theme={darkTheme}>
@@ -118,14 +126,14 @@ const Invoices: React.FC = () => {
                 <Box sx={{ flex: 1 }}>
                     <Toolbar />
                     <Box sx={{ display: "flex", justifyContent: "center", marginTop: theme.spacing(3) }}>
-                        <Paper elevation={1} sx={{ padding: theme.spacing(3), margin: theme.spacing(1), flex: 0.75, borderRadius: 8 }}>
+                        <Paper elevation={1} sx={{ padding: theme.spacing(3), margin: theme.spacing(1), borderRadius: 8, maxWidth:{ xs: '95vw',sm: '95vw', md:`calc(95vw - ${drawerWidth}px)`} }}>
                             {!UserState?.userData.isClient && <Button variant="contained" style={{ marginBottom: theme.spacing(1), borderRadius: 20 }} startIcon={<AddIcon />} onClick={() => { setInvDiagOpen(true) }}>CREATE INVOICE</Button>}
                             <InvoiceTable
                                 rows={invData}
                                 totalRowCount={invCount}
                                 onPageChange={LoadInvoice}
-                                onVoucherClick={() => { }}
-                                onProductsClick={(idx: number) => { setSelectedInv(invData[idx]) }}
+                                onVoucherClick={(idx: number) => { setSelectedInv(invData[idx]);setOpenVoucher(true); }}
+                                onProductsClick={(idx: number) => { setSelectedInv(invData[idx]);setOpenProducts(true); }}
                             />
                         </Paper>
                     </Box>

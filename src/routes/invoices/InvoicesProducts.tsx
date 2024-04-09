@@ -15,7 +15,7 @@ const InvoicesProducts: React.FC<DialogProps> = ({ isOpen, invoice, onClickClose
     //const [prodPurch, setProdPurch] = useState<ProductPurch[]>([]);
 
     return (
-        <Dialog open={isOpen} fullWidth maxWidth='lg' PaperProps={{ sx: { borderRadius: 5 } }} keepMounted={false} onClose={onClickClose}>
+        <Dialog open={isOpen} fullWidth maxWidth='sm' PaperProps={{ sx: { borderRadius: 5 } }} keepMounted={false} onClose={onClickClose}>
             <DialogTitle>Products #{(invoice==null?0:invoice!.id)}</DialogTitle>
             <DialogContent sx={{ display: 'flex' }}>
                 <TableContainer sx={{ height: '15rem'}}>

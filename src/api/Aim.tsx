@@ -114,6 +114,14 @@ export type NewInvoice = {
   date: number;
   discount: number;
   products: NewProdPurch[]
+  image?: File
+};
+
+export type NewInvoiceDTO = {
+  clientEmail: string;
+  date: number;
+  discount: number;
+  products: NewProdPurch[]
 };
 
 export const PostInvoice = async (
@@ -123,6 +131,12 @@ export const PostInvoice = async (
 
     console.log('Preparing post invoice');
 
+    const invoiceDTO:NewInvoiceDTO = {
+      ...invoice
+    }
+
+    console.log("JSON data:" + invoiceDTO);
+
     const response = await fetch(API_URL+"/invoices", {
       method: 'POST',
       headers: {
@@ -130,7 +144,7 @@ export const PostInvoice = async (
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${userState.userData.authToken}`
       },
-      body: JSON.stringify(invoice)
+      body: JSON.stringify(invoiceDTO)
     });
 
     if (!response.ok) {
@@ -138,6 +152,28 @@ export const PostInvoice = async (
     } else {
       console.log('Network data gotten!');
     }
+
+    console.log("Image? ", invoice.image);
+
+    if(invoice.image){
+
+      const results = await response.json();
+
+      let fileData = new FormData();
+      fileData.append('file',invoice.image);
+
+      const responseImage = await fetch(API_URL+"/invoices/"+results.id+"/image/", {
+        headers: {
+          'Authorization': `Bearer ${userState.userData.authToken}`
+        },
+        method: 'POST',
+        body: fileData
+      });
+
+      console.log(responseImage);
+    }
+
+    return;
 };
 
 export type Product = {

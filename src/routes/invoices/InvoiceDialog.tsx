@@ -1,12 +1,10 @@
 import * as React from 'react';
-import { Dialog, DialogTitle, DialogContent, Box, Divider, Button, useTheme, MenuItem, TextField, IconButton } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Box, Divider, Button, useTheme, MenuItem, TextField, Snackbar } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { useContext, useState } from 'react';
-import { AuthContext } from '../../context/AuthContext';
-import { DatePicker, DatePickerToolbar } from '@mui/x-date-pickers';
+import { useState, useMemo } from 'react';
+import { DatePicker } from '@mui/x-date-pickers';
 import InvoiceDialogProducts from './InvoiceDialogProducts';
-import ImageIcon from '@mui/icons-material/Image';
-import { Client, NewInvoice, NewProdPurch, PostInvoice, Product, ProductPurch } from '../../api/Aim';
+import { Client, NewInvoice, NewProdPurch, Product, ProductPurch } from '../../api/Aim';
 import moment from 'moment';
 
 interface DialogProps {
@@ -20,30 +18,64 @@ interface DialogProps {
 
 const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onClickClose, onCreateInvoice }) => {
     const theme = useTheme();
+    const imagePreview = '/photo_upload.png';
+    const onImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        console.log("onImageChange event: ", event);
+        if (event.target.files && event.target.files[0]) {
+            const validImageTypes = ["image/jpeg", "image/png"];
 
-    const UserState = useContext(AuthContext);
+            const thisFile = event.target.files[0];
+
+            let fileAccepted = validImageTypes.reduce((accepted: boolean, filetype: string) => accepted || (thisFile.type.includes(filetype)), false);
+
+            if (!fileAccepted) {
+                ShowErrorToast("This file is not an accepted image format");
+                return;
+            }
+            console.log(event.target.files[0]);
+            setImage(event.target.files[0]);
+        }
+        else {
+            setImage(null);
+        }
+    }
 
     const [prodPurch, setProdPurch] = useState<ProductPurch[]>([]);
     const [product, setProduct] = useState(0);
     const [client, setClient] = useState(0);
     const [discount, setDiscount] = useState(0);
     const [discountError, setDiscountError] = useState('');
+    const [image, setImage] = useState<File | null>(null);
     const [isQuantityValid, setQuantityValid] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [date, setDate] = React.useState(moment());
+    const imageURL = useMemo(() => { return image ? URL.createObjectURL(image) : imagePreview }, [image]);
+    const [errorToast, setErrorToast] = useState<string>("");
+    const [showError, setShowError] = useState(false);
+    const [discountValid, setDiscountValid] = useState(true);
 
-    let isDiscountValid = true;
+    function ShowErrorToast(error: string) {
+        setShowError(true);
+        setErrorToast(error);
+    }
 
     function SendInvoice() {
-        if (!isDiscountValid)
+        if (prodPurch.length < 1) {
+            ShowErrorToast("There are no products added to this invoice");
             return;
+        }
 
-        console.log("Logging date: ", date);
+        if (!discountValid) {
+            ShowErrorToast("The discount amount is not allowed");
+            return;
+        }
+
         date.hour(0);
         date.minute(0);
         date.second(0);
         date.millisecond(0);
         console.log("Loggind date with hours zeroed in: ", date);
+        console.log("Image?", image);
         const invoice: NewInvoice = {
             clientEmail: clients[client].email,
             date: date.valueOf(),
@@ -53,7 +85,8 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
                     id: prod.id,
                     quantity: prod.quantity
                 }
-            })
+            }),
+            image: image ? image : undefined
         }
 
         onCreateInvoice(invoice);
@@ -69,17 +102,32 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
 
     function ValidDiscount(num: number, clientIdx: number) {
         const currClient = clients[clientIdx];
-        isDiscountValid = num <= currClient.allowedDiscount;
-        setDiscountError(isDiscountValid ? "" : "Discount for this client can't be more than " + currClient.allowedDiscount);
+        setDiscountValid(num <= currClient.allowedDiscount);
+        setDiscountError(num <= currClient.allowedDiscount ? "" : "Discount for this client can't be more than " + currClient.allowedDiscount);
     }
 
     function ValidQuantity(num: number) {
         setQuantityValid(num > 0);
     }
 
+    function EditProductAmount(i: number, value: string) {
+        let num = Math.max(ParseNumber(value),1);
+
+        setProdPurch([
+            ...prodPurch.slice(0, i),
+            {...prodPurch[i],
+                quantity:num
+            },
+            ...prodPurch.slice(i + 1)
+        ])
+
+    }
+
     function AddProductToList() {
-        if (!isQuantityValid)
+        if (!isQuantityValid) {
+            ShowErrorToast("This amount is invalid");
             return;
+        }
 
         const currProduct = products[product];
 
@@ -127,10 +175,18 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
         setDiscount(0);
         setClient(0);
         setProduct(0);
+        setImage(null);
+        setDiscountError("");
     }
 
     return (
         <Dialog open={isOpen} fullWidth maxWidth='lg' PaperProps={{ sx: { borderRadius: 5 } }} keepMounted={false}>
+            <Snackbar
+                open={showError}
+                autoHideDuration={6000}
+                message={errorToast}
+                onClose={() => setShowError(false)}
+            />
             <DialogTitle>Create Invoice</DialogTitle>
             <DialogContent sx={{ display: 'flex' }}>
                 <Box sx={{ flex: 3, display: 'flex', justifyContent: 'space-around', flexDirection: 'column' }}>
@@ -170,8 +226,9 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
                                 value={discount.toString()}
                                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                     let num = ParseNumber(event.target.value);
-                                    setDiscount(num);
                                     ValidDiscount(num, client);
+                                    console.log("Validating: ", num);
+                                    setDiscount(num);
                                 }}
                             />
                             <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around', gap: theme.spacing(1), marginRight: theme.spacing(3) }}>
@@ -205,10 +262,10 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
                             </Box>
                         </Box>
                         <Box sx={{ flex: 1, marginLeft: theme.spacing(4), marginRight: theme.spacing(4), marginTop: theme.spacing(1), alignSelf: 'center' }}>
-                            <InvoiceDialogProducts rows={prodPurch} onClickDelete={DeleteProductFromList}></InvoiceDialogProducts>
+                            <InvoiceDialogProducts rows={prodPurch} onClickDelete={DeleteProductFromList} onAmountUpdate={EditProductAmount}></InvoiceDialogProducts>
                         </Box>
                         <Box sx={{ flex: 1, display: 'flex', justifyContent: 'left', gap: theme.spacing(3), marginTop: theme.spacing(2), marginLeft: theme.spacing(3) }}>
-                            <Button variant="contained" onClick={SendInvoice}>Add</Button>
+                            <Button variant="contained" onClick={SendInvoice} disabled={prodPurch.length < 1}>Add</Button>
                             <Button color="secondary" variant="contained" onClick={() => { CloseDialog(); onClickClose(); }}>Cancel</Button>
                         </Box>
                     </Box>
@@ -216,8 +273,18 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
                 <Divider orientation="vertical" variant="middle" flexItem />
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <DialogTitle variant='h6'>Voucher</DialogTitle>
-                    <Box sx={{ overflow: 'hidden', margin: theme.spacing(2) }}><img src={'/photo_upload.png'} style={{ width: "100%", height: "100%", alignSelf: "center" }} /></Box>
-                    <Button size="small" variant="contained" sx={{ marginLeft: theme.spacing(2) }}>UPLOAD IMAGE</Button>
+                    <Box sx={{ padding: theme.spacing(2), width: "100%", aspectRatio: 1 / 1 }}><img src={imageURL} style={{ width: '100%', aspectRatio: 1 / 1, objectFit: 'scale-down' }} /></Box>
+                    <Button
+                        size="small" variant="contained"
+                        sx={{ marginLeft: theme.spacing(2), marginRight: theme.spacing(2), justifyContent: 'center' }}
+                        component="label"
+                        tabIndex={-1}>
+                        UPLOAD IMAGE
+                        <input
+                            onChange={onImageChange} className="filetype"
+                            accept=".png,.jpeg,.jpg"
+                            type="file" hidden />
+                    </Button>
                 </Box>
             </DialogContent>
         </Dialog>

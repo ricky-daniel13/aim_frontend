@@ -68,7 +68,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ rows, onPageChange, onVouch
                                 <TableCell align="center" sx={{display: { sm: 'none', xs:'none', md:'table-cell'} }}>{row.discount}%</TableCell>
                                 <TableCell align="right">${total}</TableCell>
                                 <TableCell align="center">
-                                    <IconButton onClick={() => handleVoucherClick(index)}>
+                                    <IconButton onClick={() => handleVoucherClick(index)} disabled={!row.imageUrl}>
                                         <ReceiptIcon />
                                     </IconButton>
                                 </TableCell>

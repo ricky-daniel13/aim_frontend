@@ -80,9 +80,12 @@ const Login: React.FC = () => {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent:'center',
+        alignContent:'space-around',
+        paddingBottom:theme.spacing(15),
         gap:theme.spacing(15),
         marginTop: 8,
-        width: '100vw'
+        width: '100vw',
+        flexWrap:'wrap-reverse'
       }}
     >
       <CssBaseline />
@@ -123,6 +126,7 @@ const Login: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'left',
           width:'27rem',
+          maxWidth:'95vw'
         }}>
         <Typography variant="h3" style={{marginBottom:theme.spacing(2),marginLeft:theme.spacing(2)}}>Log In<br/></Typography>
         <Typography variant='body1' style={{textAlign: 'center'}}>We are an international
@@ -142,6 +146,7 @@ const Login: React.FC = () => {
           borderColor: 'gray',
           borderStyle: 'solid',
           width:'27rem',
+          maxWidth:'95vw'
         }}>
         <img src={'/aimedge_banner.png'} style={{ width: "50%", height: "50%", alignSelf: "center", marginBottom:theme.spacing(5) }} />
         <TextField variant="outlined"
@@ -168,7 +173,7 @@ const Login: React.FC = () => {
           fullWidth
           size='large'
           variant="contained"
-          sx={{ m:'auto', mt: 3, mb: 2}}
+          sx={{ mt: 3, mb: 2}}
           onClick={handleLogin}>
           ENTER
         </Button>
