@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dialog, DialogTitle, DialogContent, useTheme, TableContainer, TableRow, TableHead, Table, TableCell, TableBody } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TableContainer, TableRow, TableHead, Table, TableCell, TableBody } from '@mui/material';
 import {Invoice} from '../../api/Aim';
 
 interface DialogProps {
@@ -10,7 +10,6 @@ interface DialogProps {
 
 
 const InvoicesProducts: React.FC<DialogProps> = ({ isOpen, invoice, onClickClose }) => {
-    const theme = useTheme();
 
     //const [prodPurch, setProdPurch] = useState<ProductPurch[]>([]);
 

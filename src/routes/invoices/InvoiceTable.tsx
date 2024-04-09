@@ -27,7 +27,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ rows, onPageChange, onVouch
 
     const rowsPerPage = 5;
 
-    const handleChangePage = (event: unknown, newPage: number) => {
+    const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);
         onPageChange(newPage);
     };

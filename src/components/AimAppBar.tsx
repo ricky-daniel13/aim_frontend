@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Typography, AppBar, Toolbar, IconButton, Button } from '@mui/material';
+import {Typography, AppBar, Toolbar, IconButton} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { AuthContext } from '../context/AuthContext';
 import { useContext } from 'react';

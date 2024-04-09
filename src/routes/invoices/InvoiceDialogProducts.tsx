@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, useMediaQuery, useTheme, TextField } from '@mui/material';
+import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ProductPurch } from '../../api/Aim';
 
@@ -10,13 +10,6 @@ interface InvoiceTableProps {
 }
 
 const InvoiceDialogProducts: React.FC<InvoiceTableProps> = ({ rows, onClickDelete, onAmountUpdate }) => {
-    const [page, setPage] = React.useState(0);
-    const theme = useTheme();
-
-    const rowsPerPage = 5;
-
-    
-
     return (
         <TableContainer sx={{height: '15rem', width: '40rem'}}>
             <Table stickyHeader sx={{ height: "max-content" }} size="small">
