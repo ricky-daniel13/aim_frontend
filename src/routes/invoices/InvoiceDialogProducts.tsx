@@ -11,7 +11,7 @@ interface InvoiceTableProps {
 
 const InvoiceDialogProducts: React.FC<InvoiceTableProps> = ({ rows, onClickDelete, onAmountUpdate }) => {
     return (
-        <TableContainer sx={{height: '15rem', width: '40rem'}}>
+        <TableContainer sx={{height: {sm:(rows.length < 4) ? 'max-content' : '16.5em', xs:(rows.length < 4) ? 'max-content' : '16.5em', md:'16.5em'}, width:'100%'}}>
             <Table stickyHeader sx={{ height: "max-content" }} size="small">
                 <TableHead>
                     <TableRow>
@@ -31,7 +31,7 @@ const InvoiceDialogProducts: React.FC<InvoiceTableProps> = ({ rows, onClickDelet
                                     id="quantity-field"
                                     type="number"
                                     fullWidth={false}
-                                    sx={{width:'5em'}}
+                                    sx={{maxWidth:'5em'}}
                                     value={row.quantity.toString()}
                                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {onAmountUpdate(index, event.target.value)}}/></TableCell>
                             <TableCell align="center">{row.name}</TableCell>
