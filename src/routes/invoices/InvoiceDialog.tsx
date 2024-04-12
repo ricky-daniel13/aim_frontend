@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dialog, DialogTitle, DialogContent, Box, Divider, Button, useTheme, MenuItem, TextField, Snackbar, useMediaQuery } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Box, Divider, Button, useTheme, MenuItem, TextField, Snackbar, useMediaQuery, DialogActions } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useState, useMemo } from 'react';
 import { DatePicker } from '@mui/x-date-pickers';
@@ -18,7 +18,7 @@ interface DialogProps {
 
 const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onClickClose, onCreateInvoice }) => {
     const theme = useTheme();
-    const isBig=useMediaQuery(theme.breakpoints.up('sm'));
+    const isBig = useMediaQuery(theme.breakpoints.up('sm'));
     const imagePreview = '/photo_upload.png';
     const onImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         console.log("onImageChange event: ", event);
@@ -182,7 +182,7 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
     }
 
     return (
-        <Dialog open={isOpen} fullWidth maxWidth='lg' fullScreen={!isBig} PaperProps={{ sx: { borderRadius: isBig?5:0 } }} keepMounted={false}>
+        <Dialog open={isOpen} fullWidth maxWidth='lg' fullScreen={!isBig} scroll={"paper"} PaperProps={{ sx: { borderRadius: isBig ? 5 : 0 } }} keepMounted={false}>
             <Snackbar
                 open={showError}
                 autoHideDuration={6000}
@@ -190,15 +190,15 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
                 onClose={() => setShowError(false)}
             />
             <DialogTitle>Create Invoice</DialogTitle>
-            <DialogContent sx={{ display: 'flex', flexWrap:'wrap', justifyContent: 'space-evenly', marginInline:'auto' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'column', maxWidth:'40em' }}>
+            <DialogContent sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', marginInline: 'auto' }} dividers>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'column', maxWidth: '40em' }}>
                     <DialogTitle variant='h6'>User Details</DialogTitle>
                     <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around', flexDirection: 'column', gap: theme.spacing(1) }}>
-                        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around', gap: theme.spacing(2), flexWrap:'wrap' }}>
-                            <DatePicker label="Date" sx={{width:'18em'}}
+                        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around', gap: theme.spacing(2), flexWrap: 'wrap' }}>
+                            <DatePicker label="Date" sx={{ width: '18em' }}
                                 value={date}
                                 onChange={(newValue) => setDate(newValue!)} />
-                            <TextField sx={{width:'18em'}}
+                            <TextField sx={{ width: '18em' }}
                                 id="client-selector"
                                 select
                                 label="Clients"
@@ -222,7 +222,7 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
                                 type="number"
                                 error={discountError.length > 0}
                                 helperText={discountError}
-                                sx={{width:'18em'}}
+                                sx={{ width: '18em' }}
                                 value={discount.toString()}
                                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                     let num = ParseNumber(event.target.value);
@@ -231,7 +231,7 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
                                     setDiscount(num);
                                 }}
                             />
-                            <Box sx={{display: 'flex', justifyContent: 'space-around', gap: theme.spacing(1), width:'18em' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-around', gap: theme.spacing(1), width: '18em' }}>
                                 <TextField sx={{ flex: 2 }}
                                     id="product-selector"
                                     select
@@ -261,13 +261,13 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
                                 <Button size="small" sx={{ flex: 1 }} variant="contained" onClick={AddProductToList}><AddIcon /></Button>
                             </Box>
                         </Box>
-                        <Box sx={{maxWidth:'35em', marginTop: theme.spacing(1), display:'flex', alignSelf:'center', width:'100%'}}>
+                        <Box sx={{ maxWidth: '35em', marginTop: theme.spacing(1), display: 'flex', alignSelf: 'center', width: '100%' }}>
                             <InvoiceDialogProducts rows={prodPurch} onClickDelete={DeleteProductFromList} onAmountUpdate={EditProductAmount}></InvoiceDialogProducts>
                         </Box>
                     </Box>
                 </Box>
-                <Divider orientation="vertical" variant="middle" flexItem sx={{display: { xs:'none', sm: 'none', md: 'none', lg: 'block' }}} />
-                <Box sx={{ flex: 0.25, minWidth:'15em', display: 'flex', flexDirection: 'column', marginBottom: theme.spacing(2)}}>
+                <Divider orientation="vertical" variant="middle" flexItem sx={{ display: { xs: 'none', sm: 'none', md: 'none', lg: 'block' } }} />
+                <Box sx={{ flex: 0.25, minWidth: '15em', display: 'flex', flexDirection: 'column', marginBottom: theme.spacing(2) }}>
                     <DialogTitle variant='h6'>Voucher</DialogTitle>
                     <Box sx={{ padding: theme.spacing(2), width: "100%", aspectRatio: 1 / 1 }}><img src={imageURL} style={{ width: '100%', aspectRatio: 1 / 1, objectFit: 'scale-down' }} /></Box>
                     <Button
@@ -281,11 +281,11 @@ const InvoiceDialog: React.FC<DialogProps> = ({ isOpen, products, clients, onCli
                             type="file" hidden />
                     </Button>
                 </Box>
-                <Box sx={{ width:'100%', display: 'flex', justifyContent: 'left', gap: theme.spacing(3), marginTop: theme.spacing(2), marginLeft: theme.spacing(3) }}>
-                            <Button variant="contained" onClick={SendInvoice} disabled={prodPurch.length < 1}>Add</Button>
-                            <Button color="secondary" variant="contained" onClick={() => { CloseDialog(); onClickClose(); }}>Cancel</Button>
-                        </Box>
             </DialogContent>
+            <DialogActions>
+                <Button color="secondary" variant="contained" onClick={() => { CloseDialog(); onClickClose(); }} sx={{borderRadius: 8}}>Cancel</Button>
+                <Button variant="contained" onClick={SendInvoice} disabled={prodPurch.length < 1} type="submit" sx={{borderRadius: 8}}>Add</Button>
+            </DialogActions>
         </Dialog>
     );
 };
